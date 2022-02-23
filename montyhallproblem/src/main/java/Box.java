@@ -1,9 +1,9 @@
 public class Box {
     public boolean isChosenByPlayer = false;
     public boolean isOpen = false;
-    public String content;
+    public boolean hasPrice = false;
 
-    public Box(String newContent){
-        this.content = newContent;
+    public void SetPrice(){
+        this.hasPrice = true;
     }
 }

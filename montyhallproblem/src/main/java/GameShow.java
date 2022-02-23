@@ -1,22 +1,30 @@
+import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 
 public class GameShow {
 
-    Box[] boxes = {new Box("Empty"), new Box("Empty"), new Box("Empty")};
+    ArrayList<Box> boxes = new ArrayList<>();
 
-    public GameShow(){
+    public GameShow(int numBoxes){
+
+        IntStream.range(0, numBoxes).forEach(n -> {
+            boxes.add(new Box());
+        });
+
+        // Selects a random box and place a price
         var randomIndex = ThreadLocalRandom.current().nextInt(0, 3);
-        boxes[randomIndex] = new Box("Money");
+        boxes.get(randomIndex).SetPrice();
     }
 
     public void pickRandomClosedBox(){
         var randomIndex = ThreadLocalRandom.current().nextInt(0, 3);
-        boxes[randomIndex].isChosenByPlayer = true;
+        boxes.get(randomIndex).isChosenByPlayer = true;
     }
 
     public void openOneEmptyBox(){
         for(var box: boxes){
-            if(!box.isChosenByPlayer && box.content.equals("Empty")){
+            if(!box.isChosenByPlayer && !box.hasPrice){
                 box.isOpen = true;
                 break;
             }
@@ -24,29 +32,33 @@ public class GameShow {
     }
 
     public void changeToOtherClosedBox(){
-        int chosenBoxIndex = -1;
-        int lastClosedBoxIndex = -1;
-        for(var i = 0; i<boxes.length; i++){
-            if(boxes[i].isChosenByPlayer){
-                chosenBoxIndex = i;
-            }
-            else if(!boxes[i].isOpen){
-                lastClosedBoxIndex = i;
+        var playerBox = getPlayerBox();
+        var closedBox = getClosedBox();
+
+        playerBox.isChosenByPlayer = false;
+        closedBox.isChosenByPlayer = true;
+    }
+
+    public Box getPlayerBox(){
+        for(var box: boxes){
+            if(box.isChosenByPlayer){
+                return box;
             }
         }
-        boxes[chosenBoxIndex].isChosenByPlayer = false;
-        boxes[lastClosedBoxIndex].isChosenByPlayer = true;
+        return null;
+    }
+
+    public Box getClosedBox(){
+        for(var box: boxes){
+            if(!box.isChosenByPlayer && !box.isOpen){
+                return box;
+            }
+        }
+        return null;
     }
 
     public boolean checkIfPlayerWon(){
-        for(var box: boxes){
-            if(box.isChosenByPlayer){
-                if(box.content.equals("Money")){
-                    return true;
-                }
-                return false;
-            }
-        }
-        return false;
+        var playerBox = getPlayerBox();
+        return (playerBox != null) && playerBox.hasPrice;
     }
 }
